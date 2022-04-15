@@ -1,0 +1,37 @@
+<launch>
+    <!-- specify the planning pipeline -->
+    <arg name="pipeline" default="ompl" />
+
+    <!-- By default, we are not in debug mode -->
+    <arg name="debug" default="false" />
+
+    <!-- Choose controller manager: fake, simple, or ros_control -->
+    <arg name="moveit_controller_manager" default="simple" />
+
+    <arg name="use_rviz" default="true" />
+
+    <include file="$(find scorpius_moveit_config)/launch/move_group.launch">
+        <arg name="allow_trajectory_execution" value="true" />
+        <arg name="moveit_controller_manager" value="$(arg moveit_controller_manager)" />
+        <arg name="info" value="true" />
+        <arg name="debug" value="$(arg debug)" />
+        <arg name="pipeline" value="$(arg pipeline)" />
+        <arg name="load_robot_description" value="true" />
+    </include>
+
+    <include file="$(find scorpius_control)/launch/trajectory_control.launch" />
+
+    <node
+        name="robot_state_publisher"
+        pkg="robot_state_publisher"
+        type="robot_state_publisher" />
+    
+    <node pkg="scorpius_control" type="static_tf.py" name="static_tf" />
+    
+      <!-- Run Rviz and load the default config to see the state of the move_group node -->
+    <include file="$(find scorpius_moveit_config)/launch/moveit_rviz.launch" if="$(arg use_rviz)">
+        <arg name="rviz_config" value="$(dirname)/moveit.rviz"/>
+        <arg name="debug" value="$(arg debug)"/>
+    </include>
+
+</launch>
